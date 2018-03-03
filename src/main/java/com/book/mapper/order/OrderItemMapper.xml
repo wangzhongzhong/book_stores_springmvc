@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.order.OrderItemMapper">
+
+	<!-- 添加一个订单的明细 -->
+	<insert id="addOrderItem" parameterType="orderItem">
+		insert into bs_item values(bs_item_id.nextval,
+		#{count},#{price},#{order.id},'1',#{book.id})
+	</insert>
+	
+	<!-- 删除一个订单的明细，改为修改该订单的标识 -->
+	<update id="deleteOrderItem" parameterType="orderItem">
+		update bs_item set logo='0' where id=#{id}
+	</update>
+	
+	<!--  -->
+	<resultMap type="orderItem" id="selectAllOrderItemMap">
+		<id property="id" column="id"/>
+		<result property="count" column="count"/>
+		<result property="price" column="price"/>
+		<association property="book" column="book_id" javaType="book">
+			<id property="id" column="book_id"/>
+		</association>
+	</resultMap>
+	
+	<!-- 查询出指定订单id的所有的明细 -->
+	<select id="selectAllOrderItem" parameterType="order" resultMap="selectAllOrderItemMap">
+		select i.* from bs_item i where i.order_id=#{id} and i.logo='1'
+	</select>
+
+</mapper>

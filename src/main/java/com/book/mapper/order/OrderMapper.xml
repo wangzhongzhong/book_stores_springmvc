@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.order.OrderMapper">
+
+	<!-- 保存一个订单 -->
+	<insert id="addOrder" parameterType="order">
+		<selectKey order="BEFORE" keyProperty="id" resultType="int">
+			select bs_order_id.nextval from dual
+		</selectKey>
+		insert into bs_order
+		values(#{id},
+		#{orderNo},#{createDate},#{orderStatus},
+		#{total},#{user.id},'1',#{address.id})
+	</insert>
+
+	<!-- 根据id来查询出该订单 -->
+	<select id="selectById" parameterType="int" resultType="order">
+		select *
+		from bs_order where id=#{id} and logo='1'
+	</select>
+
+	<!-- 删除一个订单，改为更新他的标识 -->
+	<update id="deleteOrder" parameterType="order">
+		update bs_order set logo='0' where id=#{id}
+	</update>
+	
+	<resultMap type="order" id="selectByPageMap">
+		<id property="id" column="id"/>
+		<result property="createDate" column="CREATEDATE"/>
+		<result property="orderNo" column="orderNo"/>
+		<result property="total" column="total"/>
+		<result property="orderStatus" column="orderStatus"/>
+		<association property="address" column="address_id" javaType="address">
+			<id property="id" column="address_id"/>
+		</association>
+		<association property="user" column="user_id" javaType="user">
+			<id property="id" column="user_id"/>
+		</association>
+	</resultMap>
+
+	<!-- 分页进行显示出订单的数据，按照指定的用户去查询 -->
+	<select id="selectByPage" resultMap="selectByPageMap">
+		SELECT * FROM (
+		SELECT
+		ROWNUM NUM,A.* from (
+		select * from BS_ORDER O 
+			<where>
+				<if test="user!=null">
+					O.USER_ID=#{user.id} and
+				</if>
+				LOGO='1'
+			</where>
+		 ) A WHERE ROWNUM &lt;=#{pageNow}*#{pageSize}) B
+		WHERE B.NUM>(#{pageNow}-1)*#{pageSize}
+	</select>
+
+	<!-- 查询出指定用户的订单数量 -->
+	<select id="selectCount" resultType="int">
+		select
+		count(*) from bs_order 
+		<where>
+			<if test="use!=null">
+				user_id=#{use.id}
+			</if>
+			and logo='1'
+		</where>
+	</select>
+	
+	<!-- 根据指定的订单号，来进行查询一个订单的信息 -->
+	<select id="searchOrderByOrderNo" parameterType="string" resultMap="selectByPageMap">
+		select * from bs_order where orderNo = #{value} 
+	</select>
+	
+	<!-- 根据指定的用户，来查询出所有的订单 -->
+	<select id="searchOrderByUser" parameterType="user" resultType="order">
+		select * from bs_order where user_id = #{id} and logo='1'
+	</select>
+	
+	<!-- 查询出指定用户的，并且订单日期在该范围之间的订单信息 -->
+	<select id="searchOrderByDate" resultMap="selectByPageMap">
+		SELECT * FROM (
+		SELECT
+		ROWNUM NUM,A.* from (
+		select * from bs_order o where to_char(o.createDate,'YYYY-MM-DD') 
+		between #{minDate} and
+		#{maxDate} and user_id=#{user.id} and logo='1') A 
+		WHERE ROWNUM &lt;=#{pageNow}*#{pageSize}) B
+		WHERE B.NUM>(#{pageNow}-1)*#{pageSize}
+	</select>
+	
+	<!-- 查询出指定用户的，并且订单日期在该范围之间的订单信息个数 -->
+	<select id="searchOrderCountByDate" resultType="int">
+		select count(*) from bs_order o where to_char(o.createDate,'YYYY-MM-DD') 
+		between #{minDate} and
+		#{maxDate} and user_id=#{user.id} and logo='1'
+	</select>
+	
+	<!-- 查询出指定省市区的订单信息 -->
+	<select id="searchByAddress" resultMap="selectByPageMap">
+		SELECT * FROM (
+		SELECT
+		ROWNUM NUM,A.* from (
+		select o.* from BS_ORDER o join BS_ADDRESS c on o.address_id = c.id 
+		<where>
+			<if test="province!=null">
+				and c.provice = #{province} 
+			</if>
+			<if test="city!=null">
+				and c.city = #{city}
+			</if>
+			<if test="area!=null">
+				and c.area = #{area}
+			</if>
+			and c.logo='1'
+		</where>
+		) A 
+		WHERE ROWNUM &lt;=#{pageNow}*#{pageSize}) B
+		WHERE B.NUM>(#{pageNow}-1)*#{pageSize}
+	</select>
+	
+	<!-- 查询指定地区的订单数 -->
+	<select id="searchByAddressCount" resultType="int">
+		select count(*) from BS_ORDER o join BS_ADDRESS c on o.address_id = c.id 
+		<where>
+			<if test="province!=null">
+				and c.provice = #{province} 
+			</if>
+			<if test="city!=null">
+				and c.city = #{city}
+			</if>
+			<if test="area!=null">
+				and c.area = #{area}
+			</if>
+			and c.logo='1'
+		</where>
+	</select>
+	
+
+</mapper>

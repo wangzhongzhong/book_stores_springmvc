@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.book.BookMapper">
+
+	<!-- 添加一本图书 -->
+	<insert id="addBook" parameterType="book">
+		insert into bs_book
+		values(bs_book_id.nextval,#{bookName},#{author},
+		#{publish},#{publishDate},#{price},#{instrduce},#{imgurl},#{cate.id}
+		,'1',#{moreMes})
+	</insert>
+	
+
+	<!-- 分页进行查询出所有的图书，并且商品的类别进行分页查询 -->
+	<select id="selectBookPage"  resultType="book">
+		select * from (
+		select 
+		ROWNUM num,a.* from (
+		select b.* from BS_BOOK b join 
+		BS_CATEGORY ca on 
+		b.CATEGORY_ID=ca.ID 
+		<where>
+			<if test="type!=null">
+				ca.NAME like '%'||#{type}||'%' 
+				and logo='1'
+			</if>
+		</where>
+		) a where 
+		ROWNUM&lt;=#{pageSize}*#{pageNow})C where 
+		C.num>#{pageSize}*(#{pageNow}-1)
+	</select>
+	
+	<!-- 按照指定的条件的进行查询图书的信息，并且分页显示 -->
+	<select id="selectBySearch" resultType="book">
+		select * from (
+		select 
+		ROWNUM num,a.* from (
+		select b.* from BS_BOOK b where bookName like '%'||#{search}||'%'
+				and logo='1'
+		) a where 
+		ROWNUM&lt;=#{pageSize}*#{pageNow})C where 
+		C.num>#{pageSize}*(#{pageNow}-1)
+	</select>
+
+	<!-- 根据指定的id来查找该图书 -->
+	<select id="selectBookById" parameterType="int" resultType="book">
+		select * from bs_book b where b.id=#{id} and logo='1'
+	</select>
+
+	<!-- 统计一下指定类型的图书的数量 -->
+	<select id="selectBookCount" parameterType="string" resultType="int">
+		select count(*) from bs_book b join bs_category ca on
+		b.category_id=ca.id
+		<where>
+			<if test="type!=null">
+				ca.name like '%'||#{type}||'%' and logo='1'
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询出指定条件的图书个数 -->
+	<select id="selectBookSearchCount" resultType="int">
+		select count(*) from bs_book b where b.bookName like '%'||#{searchName}||'%' and logo='1'
+	</select>
+
+	
+	<!-- 删除一本书方法修改为更新他的标识 -->
+	<update id="deleteBookById" parameterType="int">
+		update bs_book set logo='0' where id=#{id}
+	</update>
+	
+	<!-- 更新一本图书的信息 -->
+	<update id="updateBook" parameterType="book" >
+		update bs_book 
+		<set>
+			<if test="bookName!=null">
+				bookName=#{bookName},
+			</if>
+			<if test="author!=null">
+				author=#{author},
+			</if>
+			<if test="imgurl!=null">
+				imgurl=#{imgurl},
+			</if>
+			<if test="instrduce!=null">
+				instrduce=#{instrduce},
+			</if>
+			<if test="moreMes!=null">
+				moreMes=#{moreMes},
+			</if>
+			<if test="price!=null">
+				price=#{price},
+			</if>
+			<if test="publish!=null">
+				publish=#{publish},
+			</if>
+			<if test="publishDate!=null">
+				publishDate=#{publishDate},
+			</if>
+			<if test="cate!=null">
+				CATEGORY_ID=#{cate.id},
+			</if>
+		</set>
+		where id=#{id} and logo='1'
+	</update>
+
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd
+    
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- 启动注解扫描 -->
+	<context:component-scan base-package="com.book.service" />
+	
+	<!-- 加载配置文件 -->
+	<context:property-placeholder location="classpath:config/db.properties"/>	
+	
+	<!-- 配置数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${driverClass}" />
+        <property name="url" value="${url}" />
+        <property name="username" value="${user}" />
+        <property name="password" value="${password}" />
+    </bean>
+    
+    <!-- 配置SqlSessionFactoryBean -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 指定mybatis的配置文件 -->
+		<property name="configLocation" value="classpath:config/mybatis-config.xml"/>
+		<!-- 指定数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 指定扫描的包名 如果扫描多个包,使用半角逗号隔开-->
+		<property name="basePackage" value="com.book.mapper"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"></property>
+	</bean> 
+    
+</beans>

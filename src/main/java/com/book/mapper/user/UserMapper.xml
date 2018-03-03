@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.user.UserMapper">
+
+	<!-- 添加一个新的用户 -->
+	<insert id="addUser" parameterType="user">
+		insert into bs_user
+		values(bs_user_id.nextval,#{userName},
+		#{realName},#{password},#{gender},#{phone},
+		#{email},#{company},#{state},'1',#{img_path})
+	</insert>
+	
+	<!-- 根据指定的用户名来查找 -->
+	<select id="selectByUserName" parameterType="string" resultType="user">
+		select * from bs_user u where u.username=#{value} and logo='1'
+	</select>
+	
+	<!-- 根据指定的id来进行查询出该用户 -->
+	<select id="selectById" parameterType="int" resultType="user">
+		select * from bs_user u where u.id=#{id} and logo='1'
+	</select>
+	
+	<select id="updateUser" parameterType="user">
+		update bs_user 
+		<set>
+			<if test="userName!=null">
+				userName=#{userName},
+			</if>
+			<if test="realName!=null">
+				realName=#{realName},
+			</if>
+			<if test="password!=null">
+				password=#{password},
+			</if>
+			<if test="gender!=null">
+				gender=#{gender},
+			</if>
+			<if test="company!=null">
+				company=#{company},
+			</if>
+			<if test="email!=null">
+				email=#{email},
+			</if>
+			<if test="phone!=null">
+				phone=#{phone},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+			<if test="img_path!=null">
+				img_path=#{img_path},
+			</if>
+		</set>
+		where id=#{id} and logo='1'
+	</select>
+	
+	
+	<!-- 删除功能改写成update -->
+	<update id="deleteUser" parameterType="int">
+		update bs_user set logo = '0' where id = #{id}
+	</update>
+	
+	<!-- 分页进行显示出用户的信息，并且伴有真实姓名和用户名 -->
+	<select id="selectByPage" resultType="user">
+		select * from (
+		select
+		ROWNUM num,a.* from (
+		select * from bs_user b
+			where b.logo='1'
+		) a where
+		ROWNUM&lt;=5*#{pageNow})b where
+		b.num>5*(#{pageNow}-1)
+	</select>
+	
+	<!-- 查询出限定条件下所有的记录数 -->
+	<select id="selectByNameCount" parameterType="string" resultType="int">
+		select count(*) from bs_user where username like '%'||#{value}||'%' 
+		or realname like '%'||#{value}||'%' and logo='1'
+	</select>	
+	
+	<!-- 删除一个指定id的用户信息 -->
+	<update id="deleteById" parameterType="user">
+		update bs_user set logo='0' where id=#{id} 
+	</update>
+
+</mapper>

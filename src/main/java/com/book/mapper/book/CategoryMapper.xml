@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.book.CategoryMapper">
+
+	<!-- 查询出所有的图书类型 -->
+	<select id="selectAll" resultType="category">
+		select * from bs_category
+	</select>
+	
+	<!--  -->
+	<select id="selectByName" parameterType="string" resultType="category">
+		select * from bs_category where name=#{value}
+	</select>
+	
+	<select id="selectById" parameterType="int" resultType="category">
+		select * from bs_category where id=#{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.book.mapper.user.AddressMapper">
+
+	<!-- 添加一个新的地址 -->
+	<insert id="addAddress" parameterType="address">
+		insert into bs_address
+		values(bs_address_id.nextval,
+		#{provice},#{city},#{area},#{detail},
+		#{peceiver},#{tel},#{code},#{isDefault},#{user.id},'1')
+	</insert>
+	
+	<!-- 
+	<delete id="deleteAddress" parameterType="address">
+		delete from bs_address where id=#{id}
+	</delete> -->
+	
+	<!-- 删除一个地址的改写成update -->
+	<update id="deleteAddress">
+		update bs_address set logo='0' where id=#{id}
+	</update>
+	
+	<!-- 根据指定的用户的id来进行查询本用户的所有地址 -->
+	<select id="selectByUserId" parameterType="int" resultType="address">
+		select * from bs_address where user_id=#{id} and logo='1'
+	</select>
+	
+	<!-- 根据指定id查询出地址 -->
+	<select id="selectById" parameterType="int" resultType="address">
+		select * from bs_address where id=#{id} and logo='1'
+	</select>
+	
+	<!-- 更新指定id的地址 -->
+	<update id="updateAddress" parameterType="address">
+		update bs_address 
+		<set>
+			<if test="provice!=null">
+				provice=#{provice},
+			</if>
+			<if test="city!=null">
+				city=#{city},
+			</if>
+			<if test="area!=null">
+				area=#{area},
+			</if>
+			<if test="detail!=null">
+				detail=#{detail},
+			</if>
+			<if test="peceiver!=null">
+				peceiver=#{peceiver},
+			</if>
+			<if test="tel!=null">
+				tel=#{tel},
+			</if>
+			<if test="code!=null">
+				code=#{code},
+			</if>
+			<if test="isDefault!=null">
+				isDefault=#{isDefault},
+			</if>
+		</set>
+		where id=#{id} and logo='1'
+	</update>
+	
+
+</mapper>
